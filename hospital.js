@@ -146,10 +146,12 @@ $.when(response, response2).then(function(response, response2) {
     zoom:3,
     maxZoom:22,
     minZoom: 2,
+
     // maxBounds:bounds
   });
   map.on('load', function() {
     console.log('loaded')
+    map.doubleClickZoom.disable();
     // Add a new source from our GeoJSON data and
     // set the 'cluster' option to true. GL-JS will
     // add the point_count property to your source data.
@@ -193,13 +195,6 @@ $.when(response, response2).then(function(response, response2) {
         'fill-color':'#ffffff',
         'fill-opacity':0.00000000000000000001
       }
-    });
-    map.addLayer({
-      'id': 'district_text',
-      'type': 'fill',
-      'source': 'district',
-      'minzoom': 5,
-      'layout': {},
     });
     map.addLayer({
       'id': 'district1_lines',
@@ -295,7 +290,8 @@ $.when(response, response2).then(function(response, response2) {
         'text-size': 12
       }
     });
-    map.loadImage('./redcross.png', function(error, image) {
+    // ./cross.svg
+    map.loadImage('./cross.svg', function(error, image) {
       if (error) throw error;
       map.addImage('cross', image);
     })
@@ -306,7 +302,8 @@ $.when(response, response2).then(function(response, response2) {
       filter: ['!', ['has','point_count']],
       layout: {
         'icon-image': 'cross',
-        'icon-size':0.1
+        'icon-size':0.05,
+        'icon-color': 'red'
         // 'circle-color': '#11b4da',
         // 'circle-radius': 10,
         // 'circle-stroke-width': 1,
