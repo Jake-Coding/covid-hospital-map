@@ -7,10 +7,14 @@
     <script src='https://api.mapbox.com/mapbox-gl-js/v1.8.1/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v1.8.1/mapbox-gl.css' rel='stylesheet'>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script>
+        // let bbox = turf.bbox(features);
+    </script>
     <title></title>
   </head>
   <body>
     <h1 id="heading">COVID-19 Hospital Map</h1>
+    <h1 id="loading">Loading...</h1>
     <button id="search">
       <div id="result-container">
       </div>
@@ -22,6 +26,7 @@
       </div>
     </button>
     <div id='map'></div>
+    <script src='https://unpkg.com/@turf/turf/turf.min.js'></script>
     <script src="district22.js"></script>
     <script src="hospital.js"></script>
   </body>

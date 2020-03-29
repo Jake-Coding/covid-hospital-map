@@ -56,18 +56,18 @@ function toGeoJSON(data) {
    console.log(geojson)
    return geojson
 }
-function get_beds_nearby(hospital, hospitals, radius=0.5) {
+function get_beds_nearby(lat, lon, hospitals, radius=0.5) {
   beds = 0
-  console.log(hospital)
+  // console.log(hospital)
   for (h of hospitals) {
     // console.log(h);
-    if (isClose(h.properties.attributes.LATITUDE, h.properties.attributes.LONGITUDE, hospital.lngLat.lat, hospital.lngLat.lng) && h.properties.attributes.BEDS != -999) {
+    if (isClose(h.properties.attributes.LATITUDE, h.properties.attributes.LONGITUDE, lat, lon) && h.properties.attributes.BEDS != -999) {
       beds += h.properties.attributes.BEDS
     }
   }
   return beds
 }
-function getRiskString(hospital,near_cases, hospital_beds_nearby, percent_beds_taken = 0.5, percentage_hospitalized_need = 0.12){
+function getRiskString(hospitalbeds,near_cases, hospital_beds_nearby, percent_beds_taken = 0.5, percentage_hospitalized_need = 0.12){
     // Add all hospitals in area (beds)
     // Get all covid patients in area
     // 12% of people with covid need beds
@@ -77,7 +77,7 @@ function getRiskString(hospital,near_cases, hospital_beds_nearby, percent_beds_t
     // if number between 0.8-1 HIGH RISK
     // else if between 0.5-0.8 MODERATE RISK
     // else if 0-0.5 Low RISK
-    const selfBeds = JSON.parse(hospital.features[0].properties.attributes).BEDS
+    const selfBeds = hospitalbeds
     if (selfBeds == -999) {
       return "Risk: Unknown"
   }
@@ -104,13 +104,12 @@ function getRiskString(hospital,near_cases, hospital_beds_nearby, percent_beds_t
     }
 
   }
-function coronacases_county(){
 
-}
 // }
 let response = $.ajax(hospitals);
 let response2 = $.ajax(coronacases);
 $.when(response, response2).then(function(response, response2) {
+  $("#loading").hide();
   console.log(response);
   console.log(response2)
   mapboxgl.accessToken = 'pk.eyJ1IjoiaGljb29sa2lkMTIzMTIzMTIzIiwiYSI6ImNqbXBvdDc3aTB6NWozcXFrNXF3ZHdlcnMifQ.QsjiXm8MHW9c5x5xC4RMsg';
@@ -119,16 +118,37 @@ $.when(response, response2).then(function(response, response2) {
     [-100, 40.68392799015035], // Southwest coordinates
     [100, 40.87764500765852] // Northeast coordinates
   ];
+
+  let startLongitude = -95.7129;
+  let startLatitude = 37.0902;
+  navigator.geolocation.getCurrentPosition(function(position) {
+    startLongitude = position.coords.longitude;
+    startLatitude = position.coords.latitude;
+    console.log("TRACKING ON: " + startLongitude);
+    console.log("TRACKING ON: " + startLatitude);
+    map.easeTo({
+      center: [startLongitude, startLatitude],
+      zoom: 7
+    });
+  },
+  function(error) {
+    if (error.code == error.PERMISSION_DENIED){
+      startLongitude = -95.7129;
+      startLatitude = 37.0902;
+    }
+      console.error("Permission Denied");
+  });
   let map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/dark-v10', //hosted style id
-    center: [-95.7129, 37.0902], // starting positions [negative longitude, latitude]
+    center: [startLongitude, startLatitude], // starting positions [negative longitude, latitude] [-95.7129, 37.0902] https://www.w3schools.com/html/html5_geolocation.asp
     zoom:3,
     maxZoom:22,
     minZoom: 2,
     // maxBounds:bounds
   });
   map.on('load', function() {
+    console.log('loaded')
     // Add a new source from our GeoJSON data and
     // set the 'cluster' option to true. GL-JS will
     // add the point_count property to your source data.
@@ -161,13 +181,28 @@ $.when(response, response2).then(function(response, response2) {
       'type': 'fill',
       'source': 'district',
       'minzoom': 5,
-      'layout': {},
+      layout: {
+        // 'text-field': 'Hospitals',
+        // 'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+        // 'text-size': 12
+      },
       'paint': {
         // 'line-width':1,
         // 'line-color':'#ffffff'
         'fill-color':'#ffffff',
         'fill-opacity':0.00000000000000000001
       }
+    });
+    map.addLayer({
+      'id': 'district_text',
+      'type': 'fill',
+      'source': 'district',
+      'minzoom': 5,
+      layout: {
+        'text-field': 'Hospitals',
+        'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+        'text-size': 12
+      },
     });
     map.addLayer({
       'id': 'district1_lines',
@@ -177,7 +212,7 @@ $.when(response, response2).then(function(response, response2) {
       'layout': {},
       'paint': {
         'line-width':1,
-        'line-color':'#bababa'
+        'line-color':'rgba(100,100,100,1)'
       }
     });
     map.addLayer({
@@ -185,20 +220,50 @@ $.when(response, response2).then(function(response, response2) {
       'type': 'line',
       'source': 'states',
       'minzoom': 5,
-      'layout': {},
+      layout: {},
       'paint': {
         'line-width':1,
-        'line-color':'#354255'
+        'line-color':'rgba(150,150,160,1)'
       }
     })
     //Label state counties on click with tooltip
+    function coronacases_county(county){
+      let cases = map.getSource('coronacases')._data.features
+      let covcases = 0
+      for (cov of cases){
+        let n = new Date();
+        // console.log(cov);
+        let daysApart = Math.abs((n.getTime() - new Date(cov.properties.Date).getTime()) / (1000*60*60*24));
+        // console.log(daysApart)
+        if (daysApart <= 2){
+          function isCounty(lat, lon, countyShape) {
+            let point = turf.point([lon,lat])
+            let polygon = turf.polygon(countyShape)
+            return turf.booleanPointInPolygon(point, polygon)
+          }
+              // console.log(cov.properties );
+          let countyInfo = (isCounty(cov.properties.Lat, cov.properties.Lon,county.geometry.coordinates))
+
+              // console.log(countyInfo)
+          if (countyInfo){ //Denver, DENVER
+            // console.log('yes2')
+            covcases += cov.properties.Cases
+            // console.log(cov.properties)
+          }
+          }
+        }
+        return covcases
+      }
+
     console.log(map.getSource('district'));
-    map.on('click', 'district1', function(e) {
-      console.log(e);
-      new mapboxgl.Popup()
+    map.on('dblclick', 'district1', function(e) {
+      console.log(e.target)
+      if (true) {
+      let p = new mapboxgl.Popup()
       .setLngLat(e.lngLat)
-      .setHTML(e.features[0].properties.NAME)
-      .addTo(map);
+      .setHTML(`${e.features[0].properties.NAME}: ${coronacases_county(e.features[0])} Cases  `);
+      p.addTo(map);
+}
     });
     map.addLayer({
       id: 'clusters',
@@ -287,24 +352,24 @@ $.when(response, response2).then(function(response, response2) {
     });
 
   //Create a popup, but don't add it to the map yet.
-  var popup = new mapboxgl.Popup({
+  let popup = new mapboxgl.Popup({
     closeButton: false,
-    closeOnClick: false
+    closeOnClick: true
   });
 
   map.on('mouseenter', 'places', function(e) {
   // Change the cursor style as a UI indicator.
     map.getCanvas().style.cursor = 'pointer';
 
-    var coordinates = e.features[0].geometry.coordinates.slice();
-    var description = e.features[0].properties.description;
+    let coordinates = e.features[0].geometry.coordinates.slice();
+    let description = e.features[0].properties.description;
 
     // Ensure that if the map is zoomed out such that multiple
     // copies of the feature are visible, the popup appears
     // over the copy being pointed to.
-    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-  }
+  //   while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+  //   coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+  // }
 
     // Populate the popup and set its coordinates
     // based on the feature found.
@@ -325,41 +390,36 @@ $.when(response, response2).then(function(response, response2) {
     // description HTML from its properties.
 
 
-    function htmlString(attrs, e,cov_nums) {
+    function htmlString(attrs, latitude, longitude,cov_nums) {
       let string = '';
-      string += "<span class='title-case'>"+titleCase(attrs.NAME)+"</span>"
+      string += "<h3 class='title-case'>"+titleCase(attrs.NAME)+"</h3>"
       string += ` <span class="material-icons">local_hospital</span>`
       string += '<br>'
       string += attrs.BEDS == -999 ? `Unknown beds`:`${attrs.BEDS} beds`
       string += '<br>'
       string += `${cov_nums} cases nearby`
       string += '<br>'
-      string += getRiskString(e, cov_nums,get_beds_nearby(e, map.getSource('hospitals')._data.features))
+      string += getRiskString(attrs.BEDS, cov_nums,get_beds_nearby(latitude, longitude, map.getSource('hospitals')._data.features))
       return string
     }
 
-    function mapOnClick(e) {
-      console.log(e)
-      let coordinates = e.features[0].geometry.coordinates.slice();
-      // let features =  map.queryRenderedFeatures(e.point, { layers: ['unclustered-point'] });
-      // let clusterId =  e.features[0].properties.cluster_id
-      // let point_count =  e.features[0].properties.point_count
-      // console.log(clusterSource);
-      let attrs = JSON.parse(e.features[0].properties.attributes)
+
+    function mapOnClick(latitude, longitude, attrs) {
+      console.log(latitude, longitude)
       let cases = map.getSource('coronacases')._data.features
       // console.log(cases)
 
-      function getCounty(){
-        let setting = {
-          "url": "https://api.covid19api.com/country/us/status/confirmed/live",
-          "method": "GET",
-          "timeout": 0,
-        }
-      }
+      // function getCounty(){
+      //   let setting = {
+      //     "url": "https://api.covid19api.com/country/us/status/confirmed/live",
+      //     "method": "GET",
+      //     "timeout": 0,
+      //   }
+      // }
       let covcases = 0
       let i = 0
       for (cov of cases){
-        // console.log(cov)
+        console.log(cov)
         // COMBAK:
         //"2020-03-28"
         //cov.properties.Date
@@ -376,7 +436,7 @@ $.when(response, response2).then(function(response, response2) {
         if (daysApart <= 3){
           console.log('yes')
           // console.log(cov.properties );
-          let countyInfo = isClose(cov.properties.Lat, cov.properties.Lon, attrs.LATITUDE, attrs.LONGITUDE)
+          let countyInfo = isClose(cov.properties.Lat, cov.properties.Lon, latitude, longitude)
             // console.log(countyInfo)
             if (countyInfo){ //Denver, DENVER
               console.log('yes2')
@@ -389,14 +449,11 @@ $.when(response, response2).then(function(response, response2) {
 
         if (i+1 == cases.length) {
           // console.log(covcases)
-        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-          coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-        }
 
 
         new mapboxgl.Popup()
-        .setLngLat(coordinates)
-        .setHTML(htmlString(attrs, e,covcases))
+        .setLngLat([longitude, latitude])
+        .setHTML(htmlString(attrs, latitude, longitude,covcases))
         .addTo(map);
 }
 
@@ -413,7 +470,13 @@ $.when(response, response2).then(function(response, response2) {
         // else if 0-0.5 Low RISK
       }
 
-    map.on('click', 'unclustered-point', mapOnClick);
+    map.on('click', 'unclustered-point', function(e) {
+      let lat = e.lngLat.lat
+      let lon = e.lngLat.lng
+      let attrs = JSON.parse(e.features[0].properties.attributes)
+
+      mapOnClick(lat, lon, attrs)
+    });
 //     function(e) {
 //       console.log(e)
 //       let coordinates = e.features[0].geometry.coordinates.slice();
@@ -542,9 +605,9 @@ $.when(response, response2).then(function(response, response2) {
           if(el.properties.attributes.NAME.toLowerCase() == thisResult.text().toLowerCase()){
             map.easeTo({
               center: [el.properties.attributes.LONGITUDE,el.properties.attributes.LATITUDE],
-              zoom: 17
+              zoom: 13
             });
-            mapOnClick(el);
+            mapOnClick(el.properties.attributes.LATITUDE,el.properties.attributes.LONGITUDE, el.properties.attributes);
             // break;
           }
         });
