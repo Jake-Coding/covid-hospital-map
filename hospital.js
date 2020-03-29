@@ -302,7 +302,7 @@ $.when(response, response2).then(function(response, response2) {
       filter: ['!', ['has','point_count']],
       layout: {
         'icon-image': 'cross',
-        'icon-size':0.05
+        'icon-size':1
         // 'icon-color': 'red'
         // 'circle-color': '#11b4da',
         // 'circle-radius': 10,
