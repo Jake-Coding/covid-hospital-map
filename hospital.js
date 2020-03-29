@@ -145,12 +145,26 @@ $.when(response, response2).then(function(response, response2) {
       // from 12/22/15 to 1/21/16 as logged by USGS' Earthquake hazards program.
       data: covidGeoJSON(response2[0]),
     });
+
     map.addSource('district', { // Counties
       'type': 'geojson',
-      'data': 'district1.json'
+      'data': 'district2.json'
     });
     map.addLayer({
-      'id': 'district',
+      'id': 'district1',
+      'type': 'fill',
+      'source': 'district',
+      'minzoom': 5,
+      'layout': {},
+      'paint': {
+        // 'line-width':1,
+        // 'line-color':'#ffffff'
+        'fill-color':'#ffffff',
+        'fill-opacity':0.001
+      }
+    });
+    map.addLayer({
+      'id': 'district1_lines',
       'type': 'line',
       'source': 'district',
       'minzoom': 5,
@@ -159,6 +173,14 @@ $.when(response, response2).then(function(response, response2) {
         'line-width':1,
         'line-color':'#ffffff'
       }
+    });
+    //Label state counties on click with tooltip
+    map.on('click', 'district1', function(e) {
+      console.log(e);
+      // new mapboxgl.Popup()
+      // .setLngLat(e.lngLat)
+      // .setHTML(e.features[0].properties.NAME)
+      // .addTo(map);
     });
     map.addLayer({
       id: 'clusters',
@@ -429,16 +451,46 @@ $.when(response, response2).then(function(response, response2) {
       }
 
       $("#search-input").on("change keyup paste",function(){
-        $("#result-container").html("");
-        searchFor($("#search-input").val().toLowerCase());
+        if($("#search-input").val() != ""){
+          searchFor($("#search-input").val().toLowerCase());
+        } else {
+          $(".search-result").addClass("hidden");
+        }
       });
       // $("#search-icon").click(function(){
       //   searchFor($("#search-input").val().toLowerCase());
       // });
+      function appendAll(){ //
+        let hospitals = map.getSource('hospitals')._data.features;
+        hospitals.forEach(function(element){
+          // console.log(element.properties.attributes.NAME);
+          try {
+            $("#result-container").append(`<div class="search-result hidden">${titleCase(element.properties.attributes.NAME)}</div>`);
+          } catch(e){
+            console.warn("Empty Data");
+            console.warn(element) // something like ""PROVIDENCE REGIONAL MEDICAL CENTER  - COLBY"" Theres a dash.
+            // console.warn(element);
+            // console.warn(e);
+            // try {
+            //   $("#result-container").append(`<div class="search-result hidden">`+titleCase(e.properties.attributes.name)+`</div>`);
+            // } catch (e) {
+            //
+            // }
+            // if(e.name == "TypeError"){
+            //
+            // }
+          }
 
+          // if(e.properties.attributes.NAME.toLowerCase().includes(item)){
+          //   $("#result-container").append(`<div class="search-result">`+titleCase(e.properties.attributes.NAME)+`</div>`)
+          // }
+        });
+      }
+      setTimeout(function(){
+        appendAll();
+      }, 500);
       function searchFor(item){
         let cases = map.getSource('coronacases')._data.features;
-        let hospitals = map.getSource('hospitals')._data.features;
         // let data = cases + hospitals;
         // console.log(data);
         // cases.forEach(function(e){
@@ -450,10 +502,12 @@ $.when(response, response2).then(function(response, response2) {
         //     $("#result-container").append(`<div class="search-result">`+e.properties.Province+`</div>`)
         //   }
         // });
-        hospitals.forEach(function(e){
-          console.log(e.properties.attributes.NAME);
-          if(e.properties.attributes.NAME.toLowerCase().includes(item)){
-            $("#result-container").append(`<div class="search-result">`+titleCase(e.properties.attributes.NAME)+`</div>`)
+        $(".search-result").each(function(e){
+          // $("#result-container").scrollTop($("result-container")/);
+          if($(this).text().includes(item)){
+            $(this).removeClass("hidden");
+          } else {
+            $(this).addClass("hidden");
           }
         });
         // properties.
@@ -465,11 +519,14 @@ $.when(response, response2).then(function(response, response2) {
 
 //Title Case Tutorials point
 function titleCase(string) {
-  var sentence = string.toLowerCase().split(" ");
-  for(var i = 0; i< sentence.length; i++){
-    sentence[i] = sentence[i][0].toUpperCase() + sentence[i].slice(1);
+  let sentence = string.toLowerCase().split(" +");
+  for(let i = 0; i< sentence.length; i++){
+    if (sentence[i][0].match(/[a-z]/i)) {
+      sentence[i] = sentence[i][0].toUpperCase() + sentence[i].slice(1);
+    }
   }
   // document.write(sentence.join(" "));
+  // console.warn(sentence)
   return sentence.join(" ");
 }
 //Hides header when hovered over so it doesn't get in the way
