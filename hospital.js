@@ -147,9 +147,13 @@ $.when(response, response2).then(function(response, response2) {
     });
 
     map.addSource('district', { // Counties
-      'type': 'geojson',
-      'data': 'district2.json'
+      type: 'geojson',
+      data: 'district2.json'
     });
+    map.addSource('states', {
+      type: 'geojson',
+      data: 'states.json'
+    })
     map.addLayer({
       'id': 'district1',
       'type': 'fill',
@@ -160,7 +164,7 @@ $.when(response, response2).then(function(response, response2) {
         // 'line-width':1,
         // 'line-color':'#ffffff'
         'fill-color':'#ffffff',
-        'fill-opacity':0.001
+        'fill-opacity':0.00000000000000000001
       }
     });
     map.addLayer({
@@ -171,10 +175,22 @@ $.when(response, response2).then(function(response, response2) {
       'layout': {},
       'paint': {
         'line-width':1,
-        'line-color':'#ffffff'
+        'line-color':'#bababa'
       }
     });
+    map.addLayer({
+      'id': 'states_lines',
+      'type': 'line',
+      'source': 'states',
+      'minzoom': 5,
+      'layout': {},
+      'paint': {
+        'line-width':1,
+        'line-color':'#354255'
+      }
+    })
     //Label state counties on click with tooltip
+    console.log(map.getSource('district22'));
     map.on('click', 'district1', function(e) {
       console.log(e);
       // new mapboxgl.Popup()
@@ -503,8 +519,8 @@ $.when(response, response2).then(function(response, response2) {
         //   }
         // });
         $(".search-result").each(function(e){
-          // $("#result-container").scrollTop($("result-container")/);
-          if($(this).text().includes(item)){
+          // $("#result-container").scrollTop($("#result-container")[0].scrollHeight);
+          if($(this).text().toLowerCase().includes(item.toLowerCase())){
             $(this).removeClass("hidden");
           } else {
             $(this).addClass("hidden");
@@ -519,7 +535,7 @@ $.when(response, response2).then(function(response, response2) {
 
 //Title Case Tutorials point
 function titleCase(string) {
-  let sentence = string.toLowerCase().split(" +");
+  let sentence = string.toLowerCase().split(/\s+/);
   for(let i = 0; i< sentence.length; i++){
     if (sentence[i][0].match(/[a-z]/i)) {
       sentence[i] = sentence[i][0].toUpperCase() + sentence[i].slice(1);

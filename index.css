@@ -12,6 +12,24 @@
   transition: background 0.25s;
 }
 
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--bg-act);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background-color: var(--bg-color);
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--bg-hov);
+}
+
 html,body{
   width: 100%;
   height: 100%;
@@ -29,7 +47,7 @@ html,body{
   border-radius: 10px;
   margin: 30px 15px;
   padding: 16px;
-  width: calc(100% - 60px);
+  width: calc(100% - 30px);
   text-align: center;
   transition: 0.1s opacity;
   opacity: 1;
@@ -51,7 +69,7 @@ h1, button{
 
 button{
   border: 0;
-  border-radius: 50px;
+  border-radius: 20px;
   padding: 10px;
   outline: 0;
   cursor: pointer;
@@ -66,7 +84,7 @@ button:active{
 }
 
 button > *{
-  vertical-align: center;
+  vertical-align: middle;
 }
 
 button > span.material-icons{
@@ -74,8 +92,25 @@ button > span.material-icons{
 }
 
 #search{
-  bottom: 40px;
+  bottom: 10%;
   right: 40px;
+}
+
+#search.searching{
+  max-height: calc(100% - 80px);
+  width: 300px;
+  border-top-right-radius:0px;
+  border-bottom-right-radius:0px;
+  background-color: var(--bg-act);
+}
+
+#result-container{
+  display: none;
+}
+
+#search.searching #result-container{
+  max-height: 70vh;
+  overflow-y: scroll;
 }
 
 #search-input{
@@ -99,6 +134,34 @@ button > span.material-icons{
   font-size: 22px;
 }
 
+#search #bottom-search{
+  display: inline-block;
+  /* bottom: 0;
+  position: sticky;
+  background-color: var(--bg-act);
+  display:inline-block; */
+}
+
+#search.searching #bottom-search{
+  display:block !important;
+}
+
+
+.search-result{
+  padding: 5px;
+  font-size: 16px;
+  text-align: left;
+  display: block;
+}
+
+.search-result{
+
+}
+
+.search-result.hidden{
+  display: none;
+}
+
 .mapboxgl-popup{
 
 }
@@ -108,13 +171,13 @@ button > span.material-icons{
   color:white;
 }
 .mapboxgl-popup-tip{
-  border-color: var(--bg-color) !important;
+  border-top-color: var(--bg-color) !important;
 }
 
-.title-case{
+/* .title-case{
   text-transform: lowercase;
 }
 
 .title-case:first-letter {
   text-transform: uppercase !important;
-}
+} */
