@@ -8,6 +8,7 @@ let coronacases = {
   "method": "GET",
   "timeout": 0,
 };
+
 // atom://teletype/portal/70ce17da-332c-498c-8894-6d4ef48b15f1
 // function getCoords(data) {
 //   return [-data.Lon, data.Lat]
@@ -198,11 +199,7 @@ $.when(response, response2).then(function(response, response2) {
       'type': 'fill',
       'source': 'district',
       'minzoom': 5,
-      layout: {
-        'text-field': 'Hospitals',
-        'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-        'text-size': 12
-      },
+      'layout': {},
     });
     map.addLayer({
       'id': 'district1_lines',
@@ -259,11 +256,11 @@ $.when(response, response2).then(function(response, response2) {
     map.on('dblclick', 'district1', function(e) {
       console.log(e.target)
       if (true) {
-      let p = new mapboxgl.Popup()
-      .setLngLat(e.lngLat)
-      .setHTML(`${e.features[0].properties.NAME}: ${coronacases_county(e.features[0])} Cases  `);
-      p.addTo(map);
-}
+        let p = new mapboxgl.Popup()
+        .setLngLat(e.lngLat)
+        .setHTML(`${e.features[0].properties.NAME}: ${coronacases_county(e.features[0])} Cases  `);
+        p.addTo(map);
+      }
     });
     map.addLayer({
       id: 'clusters',
@@ -298,17 +295,22 @@ $.when(response, response2).then(function(response, response2) {
         'text-size': 12
       }
     });
-
+    map.loadImage('./redcross.png', function(error, image) {
+      if (error) throw error;
+      map.addImage('cross', image);
+    })
     map.addLayer({
       id: 'unclustered-point',
-      type: 'circle',
+      type: 'symbol',
       source: 'hospitals',
       filter: ['!', ['has','point_count']],
-      paint: {
-        'circle-color': '#11b4da',
-        'circle-radius': 10,
-        'circle-stroke-width': 1,
-        'circle-stroke-color': '#fff'
+      layout: {
+        'icon-image': 'cross',
+        'icon-size':0.1
+        // 'circle-color': '#11b4da',
+        // 'circle-radius': 10,
+        // 'circle-stroke-width': 1,
+        // 'circle-stroke-color': '#fff'
       }
     });
     console.log(map)
@@ -558,6 +560,12 @@ $.when(response, response2).then(function(response, response2) {
       map.on('mouseleave', 'clusters', function() {
         map.getCanvas().style.cursor = '';
       });
+      map.on('mouseenter', 'unclustered-point', function() {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+      map.on('mouseleave', 'unclustered-point', function() {
+        map.getCanvas().style.cursor = '';
+      });
 
       //UI Stuff-----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -690,6 +698,12 @@ $.when(response, response2).then(function(response, response2) {
         // properties.
         // response2.features.properties.
       }
+      map.on('mouseenter', 'clusters', function() {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+      map.on('mouseleave', 'clusters', function() {
+        map.getCanvas().style.cursor = '';
+      });
     });
 
     });
