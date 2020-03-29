@@ -101,7 +101,7 @@ function getRiskString(hospitalbeds,near_cases, hospital_beds_nearby, percent_be
     } else if(risk_factor > 0.8) {
       return `Risk: HIGH <br><div class="progress"><div class="progress-bar" style="width:${risk_factor}"></div></div> <br> Beds needed to reduce danger to ... <br> MODERATE RISK: ${beds_for_moderate_risk} <br> LOW RISK: ${beds_for_low_risk}`
     } else {
-      return "Risk: LOW "
+      return "Risk: LOW <br><div class="progress"><div class="progress-bar" style="width:${risk_factor}"></div></div>"
     }
 
   }
@@ -302,8 +302,8 @@ $.when(response, response2).then(function(response, response2) {
       filter: ['!', ['has','point_count']],
       layout: {
         'icon-image': 'cross',
-        'icon-size':0.05,
-        'icon-color': 'red'
+        'icon-size':0.05
+        // 'icon-color': 'red'
         // 'circle-color': '#11b4da',
         // 'circle-radius': 10,
         // 'circle-stroke-width': 1,
