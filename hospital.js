@@ -94,12 +94,12 @@ function getRiskString(hospitalbeds,near_cases, hospital_beds_nearby, percent_be
     let beds_for_high_risk = Math.round(hospitalized_need)
     console.log(risk_factor)
     if(risk_factor >= 1){
-      return `Risk: EXTREME <br> Beds needed to reduce danger to... <br> HIGH RISK: ${beds_for_high_risk} <br> MODERATE RISK: ${beds_for_moderate_risk} <br> LOW RISK: ${beds_for_low_risk}`
+      return `Risk: EXTREME <br><div class="progress"><div class="progress-bar" style="width:${risk_factor}"></div></div> <br> Beds needed to reduce danger to... <br> HIGH RISK: ${beds_for_high_risk} <br> MODERATE RISK: ${beds_for_moderate_risk} <br> LOW RISK: ${beds_for_low_risk}`
 
     } else if(risk_factor <= 0.8 && risk_factor >= 0.5){
-      return `Risk: MODERATE <br> Beds needed to reduce danger to... <br> LOW RISK: ${beds_for_low_risk}`
+      return `Risk: MODERATE <br><div class="progress"><div class="progress-bar" style="width:${risk_factor}"></div></div> <br> Beds needed to reduce danger to... <br> LOW RISK: ${beds_for_low_risk}`
     } else if(risk_factor > 0.8) {
-      return `Risk: HIGH <br> Beds needed to reduce danger to ... <br> MODERATE RISK: ${beds_for_moderate_risk} <br> LOW RISK: ${beds_for_low_risk}`
+      return `Risk: HIGH <br><div class="progress"><div class="progress-bar" style="width:${risk_factor}"></div></div> <br> Beds needed to reduce danger to ... <br> MODERATE RISK: ${beds_for_moderate_risk} <br> LOW RISK: ${beds_for_low_risk}`
     } else {
       return "Risk: LOW "
     }
@@ -291,7 +291,7 @@ $.when(response, response2).then(function(response, response2) {
       }
     });
     // ./cross.svg
-    map.loadImage('./cross.svg', function(error, image) {
+    map.loadImage('./cross.png', function(error, image) {
       if (error) throw error;
       map.addImage('cross', image);
     })
