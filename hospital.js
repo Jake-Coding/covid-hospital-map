@@ -104,7 +104,9 @@ function getRiskString(hospital,near_cases, hospital_beds_nearby, percent_beds_t
     }
 
   }
+function coronacases_county(){
 
+}
 // }
 let response = $.ajax(hospitals);
 let response2 = $.ajax(coronacases);
@@ -136,7 +138,7 @@ $.when(response, response2).then(function(response, response2) {
       // from 12/22/15 to 1/21/16 as logged by USGS' Earthquake hazards program.
       data: toGeoJSON(JSON.parse(response[0])),
       cluster: true,
-      clusterMaxZoom: 14, // Max zoom to cluster points on
+      clusterMaxZoom: 10, // Max zoom to cluster points on
       clusterRadius: 100 // Radius of each cluster when clustering points (defaults to 50)
     });
     map.addSource('coronacases', { // Coronavirus Cases
@@ -148,7 +150,7 @@ $.when(response, response2).then(function(response, response2) {
 
     map.addSource('district', { // Counties
       type: 'geojson',
-      data: 'district2.json'
+      data: district22
     });
     map.addSource('states', {
       type: 'geojson',
@@ -190,13 +192,13 @@ $.when(response, response2).then(function(response, response2) {
       }
     })
     //Label state counties on click with tooltip
-    console.log(map.getSource('district22'));
+    console.log(map.getSource('district'));
     map.on('click', 'district1', function(e) {
       console.log(e);
-      // new mapboxgl.Popup()
-      // .setLngLat(e.lngLat)
-      // .setHTML(e.features[0].properties.NAME)
-      // .addTo(map);
+      new mapboxgl.Popup()
+      .setLngLat(e.lngLat)
+      .setHTML(e.features[0].properties.NAME)
+      .addTo(map);
     });
     map.addLayer({
       id: 'clusters',
@@ -323,9 +325,21 @@ $.when(response, response2).then(function(response, response2) {
     // description HTML from its properties.
 
 
+    function htmlString(attrs, e,cov_nums) {
+      let string = '';
+      string += "<span class='title-case'>"+titleCase(attrs.NAME)+"</span>"
+      string += ` <span class="material-icons">local_hospital</span>`
+      string += '<br>'
+      string += attrs.BEDS == -999 ? `Unknown beds`:`${attrs.BEDS} beds`
+      string += '<br>'
+      string += `${cov_nums} cases nearby`
+      string += '<br>'
+      string += getRiskString(e, cov_nums,get_beds_nearby(e, map.getSource('hospitals')._data.features))
+      return string
+    }
 
-    map.on('click', 'unclustered-point', function(e) {
-      // console.log(e)
+    function mapOnClick(e) {
+      console.log(e)
       let coordinates = e.features[0].geometry.coordinates.slice();
       // let features =  map.queryRenderedFeatures(e.point, { layers: ['unclustered-point'] });
       // let clusterId =  e.features[0].properties.cluster_id
@@ -379,21 +393,10 @@ $.when(response, response2).then(function(response, response2) {
           coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
         }
 
-        function htmlString(attrs, cov_nums) {
-          let string = '';
-          string += "<span class='title-case'>"+titleCase(attrs.NAME)+"</span>"
-          string += ` <span class="material-icons">local_hospital</span>`
-          string += '<br>'
-          string += attrs.BEDS == -999 ? `Unknown beds`:`${attrs.BEDS} beds`
-          string += '<br>'
-          string += `${cov_nums} cases nearby`
-          string += '<br>'
-          string += getRiskString(e, cov_nums,get_beds_nearby(e, map.getSource('hospitals')._data.features))
-          return string
-        }
+
         new mapboxgl.Popup()
         .setLngLat(coordinates)
-        .setHTML(htmlString(attrs, covcases))
+        .setHTML(htmlString(attrs, e,covcases))
         .addTo(map);
 }
 
@@ -408,7 +411,83 @@ $.when(response, response2).then(function(response, response2) {
         // if number between 0.8-1 HIGH RISK
         // else if between 0.5-0.8 MODERATE RISK
         // else if 0-0.5 Low RISK
-      })
+      }
+
+    map.on('click', 'unclustered-point', mapOnClick);
+//     function(e) {
+//       console.log(e)
+//       let coordinates = e.features[0].geometry.coordinates.slice();
+//       // let features =  map.queryRenderedFeatures(e.point, { layers: ['unclustered-point'] });
+//       // let clusterId =  e.features[0].properties.cluster_id
+//       // let point_count =  e.features[0].properties.point_count
+//       // console.log(clusterSource);
+//       let attrs = JSON.parse(e.features[0].properties.attributes)
+//       let cases = map.getSource('coronacases')._data.features
+//       // console.log(cases)
+//
+//       function getCounty(){
+//         let setting = {
+//           "url": "https://api.covid19api.com/country/us/status/confirmed/live",
+//           "method": "GET",
+//           "timeout": 0,
+//         }
+//       }
+//       let covcases = 0
+//       let i = 0
+//       for (cov of cases){
+//         // console.log(cov)
+//         // COMBAK:
+//         //"2020-03-28"
+//         //cov.properties.Date
+//         let n = new Date();
+//         // console.log(new Date((cov.properties.Date.toString()).slice(0,10)).setHours(0,0,0,0))
+//         // console.log(new Date().setHours(0,0,0,0))
+//         // console.log((cov.properties.Date).slice(0,10))
+//         // console.log(n.toISOString().slice(0,10))
+//         // console.log(new Date(cov.properties.Date))
+//         // console.log(n);
+//         let daysApart = Math.abs((n.getTime() - new Date(cov.properties.Date).getTime()) / (1000*60*60*24));
+//         // console.log(daysApart)
+//
+//         if (daysApart <= 3){
+//           console.log('yes')
+//           // console.log(cov.properties );
+//           let countyInfo = isClose(cov.properties.Lat, cov.properties.Lon, attrs.LATITUDE, attrs.LONGITUDE)
+//             // console.log(countyInfo)
+//             if (countyInfo){ //Denver, DENVER
+//               console.log('yes2')
+//               covcases += cov.properties.Cases
+//               // console.log(cov.properties)
+//             }
+//           }
+//           i += 1;
+//
+//
+//         if (i+1 == cases.length) {
+//           // console.log(covcases)
+//         while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+//           coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+//         }
+//
+//
+//         new mapboxgl.Popup()
+//         .setLngLat(coordinates)
+//         .setHTML(htmlString(attrs, covcases))
+//         .addTo(map);
+// }
+//
+//
+// };
+//         // Add all hospitals in area (beds)
+//         // Get all covid patients in area
+//         // 12% of people with covid need beds
+//         // (covid patients * 0.12)/# of beds in the area
+//         // HOSPITAL OVERFLOW RISK:
+//         // if number > 1 DISASTER.
+//         // if number between 0.8-1 HIGH RISK
+//         // else if between 0.5-0.8 MODERATE RISK
+//         // else if 0-0.5 Low RISK
+//       }
 
       map.on('mouseenter', 'clusters', function() {
         map.getCanvas().style.cursor = 'pointer';
@@ -451,6 +530,28 @@ $.when(response, response2).then(function(response, response2) {
 
       $("#search-close").click(function(e){
         closeSearch(e);
+      });
+
+      appendAll();
+
+      $(".search-result").click(function(){
+        let hospitals = map.getSource('hospitals')._data.features;
+        // $(this).text().toLowerCase()
+        let thisResult = $(this);
+        hospitals.forEach(function(el){
+          if(el.properties.attributes.NAME.toLowerCase() == thisResult.text().toLowerCase()){
+            map.easeTo({
+              center: [el.properties.attributes.LONGITUDE,el.properties.attributes.LATITUDE],
+              zoom: 17
+            });
+            mapOnClick(el);
+            // break;
+          }
+        });
+        // map.easeTo({
+        //   center: features[0].geometry.coordinates,
+        //   zoom: zoom
+        // });
       });
       // map.on("click", function(){
       //   closeSearch();
@@ -502,9 +603,6 @@ $.when(response, response2).then(function(response, response2) {
           // }
         });
       }
-      setTimeout(function(){
-        appendAll();
-      }, 500);
       function searchFor(item){
         let cases = map.getSource('coronacases')._data.features;
         // let data = cases + hospitals;

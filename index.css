@@ -99,8 +99,8 @@ button > span.material-icons{
 #search.searching{
   max-height: calc(100% - 80px);
   width: 300px;
-  border-top-right-radius:0px;
-  border-bottom-right-radius:0px;
+  /* border-top-right-radius:0px;
+  border-bottom-right-radius:0px; */
   background-color: var(--bg-act);
 }
 
@@ -118,6 +118,7 @@ button > span.material-icons{
   background-color: transparent;
   border: 0;
   outline: 0;
+  border-radius: 0;
   border-bottom: 2px solid white;
 }
 
@@ -148,14 +149,18 @@ button > span.material-icons{
 
 
 .search-result{
-  padding: 5px;
+  padding: 10px;
   font-size: 16px;
   text-align: left;
   display: block;
 }
 
-.search-result{
+.search-result:hover{
+  background-color: var(--bg-color);
+}
 
+.search-result:active{
+  background-color: var(--bg-hov);
 }
 
 .search-result.hidden{
