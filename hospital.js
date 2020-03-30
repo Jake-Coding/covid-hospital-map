@@ -206,7 +206,7 @@ $.when(response, response2).then(function(response, response2) {
       for (cov of cases){
         let n = new Date();
         let daysApart = Math.abs((n.getTime() - new Date(cov.properties.Date).getTime()) / (1000*60*60*24));
-        if (daysApart <= 3){ // (change if needed lol) !IMPORTANT
+        if (daysApart <= 2.25){ // (change if needed lol) !IMPORTANT
           function isCounty(lat, lon, countyShape) {
             let point = turf.point([lon,lat])
             let polygon = turf.polygon(countyShape)
@@ -355,7 +355,7 @@ $.when(response, response2).then(function(response, response2) {
       for (cov of cases){
         let n = new Date();
         let daysApart = Math.abs((n.getTime() - new Date(cov.properties.Date).getTime()) / (1000*60*60*24));
-        if (daysApart <= 3){
+        if (daysApart <= 2.25){
           let countyInfo = isClose(cov.properties.Lat, cov.properties.Lon, latitude, longitude)
             if (countyInfo){ //Denver, DENVER
               covcases += cov.properties.Cases
