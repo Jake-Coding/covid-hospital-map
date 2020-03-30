@@ -234,7 +234,7 @@ $.when(response, response2).then(function(response, response2) {
       id: 'clusters',
       type: 'circle',
       source: 'hospitals',
-      filter: ['>', 'point_count', 10],
+      filter: ['>', 'point_count', 5],
       paint: {
 
         'circle-color': [
@@ -252,7 +252,7 @@ $.when(response, response2).then(function(response, response2) {
       id: 'cluster-count',
       type: 'symbol',
       source: 'hospitals',
-      filter: ['>', 'point_count', 10], // ['has', 'point_count']
+      filter: ['>', 'point_count', 5], // ['has', 'point_count']
       layout: {
         'text-field': '{point_count_abbreviated} Hospitals',
         'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
