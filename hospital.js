@@ -337,7 +337,7 @@ $.when(response, response2).then(function(response, response2) {
       string += "<h3 class='title-case'>"+titleCase(attrs.NAME)+"</h3>"
       string += "<h4>Contact Info</h4>"
       string += `<h5>Phone Number: ${attrs.TELEPHONE}</h5>`
-      string += `<h5>Website: ${attrs.WEBSITE}</h5>`
+      string += `<h5>Website: <a href="${attrs.WEBSITE}" target="_blank">${attrs.WEBSITE}</a></h5>`
       string += `<h5>Address: ${attrs.ADDRESS}, ${attrs.CITY}, ${attrs.STATE} ${attrs.ZIP}</h5>`
       string += '<br>'
       string += '<h4>Statistics</h4>'
