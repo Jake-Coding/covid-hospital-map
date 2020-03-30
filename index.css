@@ -162,7 +162,9 @@ button > span.material-icons{
   background-color: var(--bg-act);
   display:inline-block; */
 }
-
+#bottom-search{
+  line-height: 0px;
+}
 #search.searching #bottom-search{
   display:block !important;
 }
@@ -216,10 +218,16 @@ button > span.material-icons{
   border:none;
   background-color: var(--bg-color);
   border-radius: 100px;
-  font-size: 20px;
+  font-size: 20px !important;
   color: white;
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
+}
+#help-btn:hover{
+  background-color: var(--bg-hov);
+}
+#help-btn:act{
+  background-color: var(--bg-act);
 }
 /* #help-btn > span {
   width: 40px;
@@ -279,6 +287,41 @@ button > span.material-icons{
   text-align: right;
   position: static;
 }
+
+.progress {
+  margin-top: 10px;
+  background-image: linear-gradient(to right, #4d4dff, #ff4d4d);
+  background-image: -webkit-linear-gradient(to right, #4d4dff, #ff4d4d);
+  background-image: -moz-linear-gradient(to right, #4d4dff, #ff4d4d);
+  background-image: -o-linear-gradient(to right, #4d4dff, #ff4d4d);
+}
+
+.progress-bar {
+  box-shadow: 0px 0px 0px 2000px var(--bg-color) !important;
+  background-image: none !important;
+  background-color: transparent !important; /* color of progress bar */
+}
+
+span.low, span.moderate, span.high, span.extreme{
+  font-weight: bold;
+}
+
+span.low{
+  color: rgb(20, 255, 20);
+}
+
+span.moderate{
+  color: rgb(255, 255, 20);
+}
+
+span.high{
+  color: rgb(255, 147.5, 20);
+}
+
+span.extreme{
+  color: rgb(255, 20, 20);
+}
+
 /* .title-case{
   text-transform: lowercase;
 }
