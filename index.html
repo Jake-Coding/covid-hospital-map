@@ -2,6 +2,9 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="index.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src='https://api.mapbox.com/mapbox-gl-js/v1.8.1/mapbox-gl.js'></script>
@@ -15,6 +18,26 @@
   <body>
     <h1 id="heading">COVID-19 Hospital Map</h1>
     <h1 id="loading">Loading...</h1>
+
+    <button type="button" name="button" id="help-btn">?</button>
+    <div id="modal-help">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h1>Help</h1>
+          <span class="flex"></span>
+          <i class="material-icons" id="icon-close">close</i>
+        </div>
+        <div class="modal-body">
+          <h2>Cases by County</h2>
+          <p>Double Click inside the County lines to access data for that county. If it does not work on the first double click, try a different area inside of the county.</p>
+          <h2>Hospital Data</h2>
+          <p>To see the data for each hospital zoom in until you see a cross and click on it. You can also use the search function.</p>
+          <h2>Risk Factor (Explanation)</h2>
+          <p>The risk factor is what we calculate to be how "at risk" a hospital is of overflowing. We assume that 12% of cases are hospitalized, and that 50% of the beds inthe hospital are already taken. With this data, we can estimate how at risk a hospital is of overflowing.</p>
+        </div>
+      </div>
+    </div>
+    </div>
     <button id="search">
       <div id="result-container">
       </div>
@@ -26,7 +49,6 @@
       </div>
     </button>
     <div id='map'></div>
-    <script src="polylabel.js"></script>
     <script src='https://unpkg.com/@turf/turf/turf.min.js'></script>
     <script src="district22.js"></script>
     <script src="hospital.js"></script>

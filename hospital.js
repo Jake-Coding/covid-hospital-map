@@ -1,5 +1,5 @@
 let hospitals = {
-  "url": "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Hospitals_1/FeatureServer/0/query?where=1%3D1&outFields=OBJECTID,ID,NAME,LATITUDE,LONGITUDE,BEDS,TRAUMA,POPULATION,COUNTY,NAICS_CODE&outSR=4326&f=json",
+  "url": "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Hospitals_1/FeatureServer/0/query?where=1%3D1&outFields=OBJECTID,ID,NAME,ADDRESS,CITY,STATE,ZIP,TELEPHONE,POPULATION,COUNTY,LATITUDE,LONGITUDE,NAICS_CODE,WEBSITE,ST_FIPS,BEDS,TRAUMA&outSR=4326&f=json",
   "method": "GET",
   "timeout": 0,
 };
@@ -34,11 +34,11 @@ function covidGeoJSON(data) {
           "properties" : d
       })
    }}
-   console.log(geojson)
+   // console.log(geojson)
    return geojson
 }
 function toGeoJSON(data) {
-  console.log(data)
+  // console.log(data)
   let geojson = {
     "type": "FeatureCollection",
     "features": []
@@ -54,7 +54,7 @@ function toGeoJSON(data) {
           "properties" : d
       })
    }
-   console.log(geojson)
+   // console.log(geojson)
    return geojson
 }
 function get_beds_nearby(lat, lon, hospitals, radius=0.5) {
@@ -82,26 +82,25 @@ function getRiskString(hospitalbeds,near_cases, hospital_beds_nearby, percent_be
     if (selfBeds == -999) {
       return "Risk: Unknown"
   }
-    console.log(hospital_beds_nearby)
-    console.log(selfBeds)
+    // console.log(hospital_beds_nearby)
+    // console.log(selfBeds)
     let available_beds = (1-percent_beds_taken)*(hospital_beds_nearby + selfBeds)
-    console.log(available_beds)
+    // console.log(available_beds)
     let hospitalized_need = percentage_hospitalized_need * near_cases;
-    console.log(hospitalized_need)
+    // console.log(hospitalized_need)
     let risk_factor = hospitalized_need/available_beds
     let beds_for_low_risk = Math.round(hospitalized_need/0.5)
     let beds_for_moderate_risk = Math.round(hospitalized_need / 0.8)
     let beds_for_high_risk = Math.round(hospitalized_need)
-    console.log(risk_factor)
+    // console.log(risk_factor)
     if(risk_factor >= 1){
-      return `Risk: EXTREME <br><div class="progress"><div class="progress-bar" style="width:${risk_factor}"></div></div> <br> Beds needed to reduce danger to... <br> HIGH RISK: ${beds_for_high_risk} <br> MODERATE RISK: ${beds_for_moderate_risk} <br> LOW RISK: ${beds_for_low_risk}`
-
+      return `<h5>Risk: EXTREME</h5><div class="progress"><div class="progress-bar" style="width:100%"></div></div><br> <h5>Beds needed to reduce danger to... <br> HIGH RISK: ${beds_for_high_risk} <br> MODERATE RISK: ${beds_for_moderate_risk} <br> LOW RISK: ${beds_for_low_risk}</h5>`
     } else if(risk_factor <= 0.8 && risk_factor >= 0.5){
-      return `Risk: MODERATE <br><div class="progress"><div class="progress-bar" style="width:${risk_factor}"></div></div> <br> Beds needed to reduce danger to... <br> LOW RISK: ${beds_for_low_risk}`
+      return `<h5>Risk: MODERATE</h5><div class="progress"><div class="progress-bar" style="width:${risk_factor*100}%"></div></div> <br> <h5>Beds needed to reduce danger to... <br> LOW RISK: ${beds_for_low_risk}</h5>`
     } else if(risk_factor > 0.8) {
-      return `Risk: HIGH <br><div class="progress"><div class="progress-bar" style="width:${risk_factor}"></div></div> <br> Beds needed to reduce danger to ... <br> MODERATE RISK: ${beds_for_moderate_risk} <br> LOW RISK: ${beds_for_low_risk}`
+      return `<h5>Risk: HIGH</h5><div class="progress"><div class="progress-bar" style="width:${risk_factor*100}%"></div></div><br><h5>Beds needed to reduce danger to ... <br> MODERATE RISK: ${beds_for_moderate_risk} <br> LOW RISK: ${beds_for_low_risk}</h5>`
     } else {
-      return `Risk: LOW <br><div class="progress"><div class="progress-bar" style="width:${risk_factor}"></div></div>`
+      return `<h5>Risk: LOW</h5><div class="progress"><div class="progress-bar" style="width:${risk_factor*100}%"></div></div>`
     }
 
   }
@@ -111,8 +110,8 @@ let response = $.ajax(hospitals);
 let response2 = $.ajax(coronacases);
 $.when(response, response2).then(function(response, response2) {
   $("#loading").hide();
-  console.log(response);
-  console.log(response2)
+  // console.log(response);
+  // console.log(response2)
   mapboxgl.accessToken = 'pk.eyJ1IjoiaGljb29sa2lkMTIzMTIzMTIzIiwiYSI6ImNqbXBvdDc3aTB6NWozcXFrNXF3ZHdlcnMifQ.QsjiXm8MHW9c5x5xC4RMsg';
 
   let bounds = [
@@ -125,8 +124,8 @@ $.when(response, response2).then(function(response, response2) {
   navigator.geolocation.getCurrentPosition(function(position) {
     startLongitude = position.coords.longitude;
     startLatitude = position.coords.latitude;
-    console.log("TRACKING ON: " + startLongitude);
-    console.log("TRACKING ON: " + startLatitude);
+    // console.log("TRACKING ON: " + startLongitude);
+    // console.log("TRACKING ON: " + startLatitude);
     map.easeTo({
       center: [startLongitude, startLatitude],
       zoom: 7
@@ -150,7 +149,7 @@ $.when(response, response2).then(function(response, response2) {
     // maxBounds:bounds
   });
   map.on('load', function() {
-    console.log('loaded')
+    // console.log('loaded')
     map.doubleClickZoom.disable();
     // Add a new source from our GeoJSON data and
     // set the 'cluster' option to true. GL-JS will
@@ -247,9 +246,9 @@ $.when(response, response2).then(function(response, response2) {
         return covcases
       }
 
-    console.log(map.getSource('district'));
+    // console.log(map.getSource('district'));
     map.on('dblclick', 'district1', function(e) {
-      console.log(e.target)
+      // console.log(e.target)
       if (true) {
         let p = new mapboxgl.Popup()
         .setLngLat(e.lngLat)
@@ -310,7 +309,7 @@ $.when(response, response2).then(function(response, response2) {
         // 'circle-stroke-color': '#fff'
       }
     });
-    console.log(map)
+    // console.log(map)
 
     // inspect a cluster on click
     map.on('click', 'clusters', function(e) {
@@ -392,19 +391,21 @@ $.when(response, response2).then(function(response, response2) {
     function htmlString(attrs, latitude, longitude,cov_nums) {
       let string = '';
       string += "<h3 class='title-case'>"+titleCase(attrs.NAME)+"</h3>"
-      string += ` <span class="material-icons">local_hospital</span>`
+      string += "<h4>Contact Info</h4>"
+      string += `<h5>Phone Number: ${attrs.TELEPHONE}</h5>`
+      string += `<h5>Website: ${attrs.WEBSITE}</h5>`
+      string += `<h5>Address: ${attrs.ADDRESS}, ${attrs.CITY}, ${attrs.STATE} ${attrs.ZIP}</h5>`
       string += '<br>'
-      string += attrs.BEDS == -999 ? `Unknown beds`:`${attrs.BEDS} beds`
-      string += '<br>'
-      string += `${cov_nums} cases nearby`
-      string += '<br>'
+      string += '<h4>Statistics</h4>'
+      string += attrs.BEDS == -999 ? `<h5>Unknown beds</h5>`:`<h5><b>${attrs.BEDS}</b> beds</h5>`
+      string += `<h5><b>${cov_nums}</b> cases nearby<h5>`
       string += getRiskString(attrs.BEDS, cov_nums,get_beds_nearby(latitude, longitude, map.getSource('hospitals')._data.features))
       return string
     }
 
 
     function mapOnClick(latitude, longitude, attrs) {
-      console.log(latitude, longitude)
+      // console.log(latitude, longitude)
       let cases = map.getSource('coronacases')._data.features
       // console.log(cases)
 
@@ -418,7 +419,7 @@ $.when(response, response2).then(function(response, response2) {
       let covcases = 0
       let i = 0
       for (cov of cases){
-        console.log(cov)
+        // console.log(cov)
         // COMBAK:
         //"2020-03-28"
         //cov.properties.Date
@@ -433,12 +434,12 @@ $.when(response, response2).then(function(response, response2) {
         // console.log(daysApart)
 
         if (daysApart <= 3){
-          console.log('yes')
+          // console.log('yes')
           // console.log(cov.properties );
           let countyInfo = isClose(cov.properties.Lat, cov.properties.Lon, latitude, longitude)
             // console.log(countyInfo)
             if (countyInfo){ //Denver, DENVER
-              console.log('yes2')
+              // console.log('yes2')
               covcases += cov.properties.Cases
               // console.log(cov.properties)
             }
@@ -567,6 +568,7 @@ $.when(response, response2).then(function(response, response2) {
       //UI Stuff-----------------------------------------------------------------------------------------------------------------------------------------
 
       $("body").mousemove(function(e){
+
         if(e.pageY <= 70 && $("h1").css("opacity") <= 0.2){
           $("#heading").css("z-index","0");
         } else if(e.pageY > 70) {
@@ -717,8 +719,17 @@ function titleCase(string) {
   // console.warn(sentence)
   return sentence.join(" ");
 }
+
 //Hides header when hovered over so it doesn't get in the way
 $(function(){
+  $('#modal-help').hide()
+  $('#icon-close').click(function(){
+    $('#modal-help').toggle();
+  })
 
+  $('#help-btn').click(function(){
+    // console.log('clicked');
+    $('#modal-help').toggle();
+  })
 
 });
